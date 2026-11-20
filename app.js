@@ -251,3 +251,14 @@ dlg.querySelector('[data-gmail]').href='https://mail.google.com/mail/?view=cm&fs
 dlg.querySelector('[data-outlook]').href='https://outlook.office.com/mail/deeplink/compose?to='+encodeURIComponent(to)+'&subject='+encodeURIComponent(su)+'&body='+encodeURIComponent(body);
 dlg.querySelector('[data-mail-note]').textContent=su?'Objet prérempli : « '+su+' ». Il ne vous reste qu’à compléter et envoyer.':'Vous pouvez aussi copier l’adresse et l’utiliser dans votre messagerie habituelle.';
 dlg.showModal()});})();
+
+/* Intro d'ouverture : une fois par visite, passable d'un clic ou d'une touche. */
+(()=>{const root=document.documentElement;if(!root.classList.contains('jmp-intro-pending'))return;
+const svg='<svg viewBox="0 0 430 350" aria-hidden="true"><path style="--l:140" d="M165 47 212 7 259 47"/><path style="--l:90" d="M178 47V90M246 47V90"/><path style="--l:80" d="M202 90V63Q212 49 222 63V90"/><path style="--l:300" d="M68 117H358"/><circle class="b" style="--l:60" cx="68" cy="117" r="9"/><circle class="b" style="--l:60" cx="358" cy="117" r="9"/><path style="--l:210" d="M212 117V315"/><path style="--l:260" d="M72 127 25 243M72 127 130 243M350 127 278 243M350 127 405 243"/><path class="b" style="--l:330" d="M8 245H150Q142 287 79 287Q16 287 8 245Z"/><path class="b" style="--l:350" d="M272 245H418Q410 287 345 287Q280 287 272 245Z"/><path style="--l:200" d="M180 325H245M148 340H280"/></svg>';
+const el=document.createElement('div');el.className='jmp-intro';el.setAttribute('role','presentation');
+el.innerHTML='<span class="jmp-intro-line"></span><div class="jmp-intro-inner">'+svg+'<div class="jmp-intro-name">JMP</div><div class="jmp-intro-words"><span><b>Lot</b></span><span><i>·</i></span><span><b>Droit</b></span><span><i>·</i></span><span><b>IA</b></span></div></div><button type="button" class="jmp-intro-skip">Passer</button>';
+document.body.appendChild(el);root.classList.remove('jmp-intro-pending');
+let done=false;const timers=[];
+const close=()=>{if(done)return;done=true;timers.forEach(clearTimeout);el.classList.add('is-opening');setTimeout(()=>el.remove(),800);removeEventListener('keydown',close)};
+timers.push(setTimeout(close,1650));el.addEventListener('click',close);addEventListener('keydown',close);
+setTimeout(()=>{if(!done)close()},4000);})();

@@ -101,3 +101,27 @@
 .mail-dialog-choices a:hover,.mail-dialog-choices a:focus-visible{border-color:var(--teal);background:#eef6f4;outline:none}
 .mail-dialog-choices a:after{content:" →";color:var(--teal)}
 .mail-dialog-note{margin:14px 0 0;font-size:.88rem;color:var(--muted)}
+/* Intro d'ouverture (une fois par visite) */
+html.jmp-intro-pending{background:#0b1626}
+html.jmp-intro-pending body{visibility:hidden}
+.jmp-intro{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 42%,#14294a,#0b1626 62%);color:#fff;cursor:pointer;clip-path:inset(0 0 0 0)}
+.jmp-intro.is-opening{clip-path:inset(0 0 0 100%);transition:clip-path .75s cubic-bezier(.7,0,.2,1)}
+.jmp-intro-line{position:absolute;top:0;bottom:0;left:0;width:3px;background:#5ee6d0;box-shadow:0 0 26px 7px rgba(94,230,208,.6);opacity:0}
+.jmp-intro.is-opening .jmp-intro-line{animation:jmpIntroLine .75s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes jmpIntroLine{0%{left:0;opacity:1}90%{opacity:1}100%{left:100%;opacity:0}}
+.jmp-intro-inner{display:grid;justify-items:center;gap:14px;text-align:center}
+.jmp-intro svg{width:min(190px,42vw);height:auto;overflow:visible}
+.jmp-intro svg *{fill:none;stroke:#fff;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:var(--l);stroke-dashoffset:var(--l);animation:jmpDraw .7s ease forwards}
+.jmp-intro svg .b{fill:#fff;fill-opacity:0;animation:jmpDraw .7s ease forwards,jmpFill .35s ease .55s forwards}
+@keyframes jmpDraw{to{stroke-dashoffset:0}}
+@keyframes jmpFill{to{fill-opacity:1}}
+.jmp-intro-name{font:700 clamp(2.4rem,7vw,3.6rem)/1 Georgia,"Times New Roman",serif;letter-spacing:.06em;opacity:0;transform:translateY(8px);animation:jmpUp .5s ease .45s forwards}
+.jmp-intro-words{display:flex;gap:14px;align-items:center;font:700 .82rem/1 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:#7f95ad}
+.jmp-intro-words span{opacity:0;animation:jmpWord .35s ease forwards}
+.jmp-intro-words span:nth-child(1){animation-delay:.75s}.jmp-intro-words span:nth-child(2){animation-delay:.85s}.jmp-intro-words span:nth-child(3){animation-delay:.95s}.jmp-intro-words span:nth-child(4){animation-delay:1.05s}.jmp-intro-words span:nth-child(5){animation-delay:1.15s}
+.jmp-intro-words b{font-weight:700}
+.jmp-intro-words span:last-child b{color:#5ee6d0;text-shadow:0 0 14px rgba(94,230,208,.55)}
+.jmp-intro-words i{font-style:normal;color:#3b5068}
+@keyframes jmpUp{to{opacity:1;transform:none}}
+@keyframes jmpWord{to{opacity:1;color:#e8eef6}}
+.jmp-intro-skip{position:absolute;right:18px;bottom:16px;border:0;background:none;color:#7f95ad;font:600 .8rem/1 Inter,system-ui,sans-serif;cursor:pointer;padding:8px}
