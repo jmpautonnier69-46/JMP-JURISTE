@@ -279,3 +279,7 @@ body.theme-ia{background:var(--night);color:#dbe5f0}
 .ai-doc mark sup{position:absolute;top:-.55em;right:-9px;margin:0}
 .hs-paper u:after{position:absolute;top:-.7em;right:-12px;margin:0;background:#fffdf8}
 .hs-paper u{margin-right:6px}
+.theme-ia .mail-dialog h2,.theme-ia .mail-dialog strong,.theme-ia .mail-dialog a{color:var(--ink)}
+.theme-ia .mail-dialog p{color:var(--muted)}
+.theme-ia .mail-dialog .eyebrow{color:var(--teal);font-family:Inter,system-ui,sans-serif}
+.theme-ia .mail-dialog .eyebrow:before{content:none}
