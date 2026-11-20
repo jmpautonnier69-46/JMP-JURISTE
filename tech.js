@@ -43,9 +43,80 @@
       timers.push(setTimeout(finalState, 900 + n * 1300 + 500));
       timers.push(setTimeout(function () { if (visible && !document.hidden) cycle(); else running = false; }, 900 + n * 1300 + 7500));
     }
+    if (root.closest('[data-hero-story]')) {
+      root._ai = {
+        play: function () { if (reduce) { finalState(); return; } clear(); running = true; setStep(0); root.classList.remove('is-done'); root.classList.add('is-scanning'); status.textContent = 'Analyse en cours';
+          for (var i = 1; i <= n; i++) { (function (k) { timers.push(setTimeout(function () { setStep(k); }, 1300 + k * 1100)); })(i); }
+          timers.push(setTimeout(finalState, 1300 + n * 1100 + 400)); },
+        reset: function () { clear(); running = false; setStep(0); root.classList.remove('is-done', 'is-scanning'); status.textContent = 'Analyse en cours'; },
+        finish: finalState
+      };
+      return;
+    }
     if (reduce) { finalState(); return; }
     onVisible(root, function (v) { visible = v; if (v && !running) cycle(); }, 0.3);
     document.addEventListener('visibilitychange', function () { if (!document.hidden && visible && !running) cycle(); });
+  }
+
+
+  /* ---------- 1 bis. Hero en trois scènes ---------- */
+  function initHeroStory(fig) {
+    var scenes = fig.querySelectorAll('.hs-scene'), tabs = fig.querySelectorAll('[data-go]');
+    var title = fig.querySelector('[data-hs-title]'), text = fig.querySelector('[data-hs-text]');
+    var ai = fig.querySelector('[data-ai-scan]');
+    var law = fig.querySelector('.hs-law'), lawMarks = law.querySelectorAll('u'), lawRefs = law.querySelectorAll('.hs-refs li'), stamp = law.querySelector('.hs-stamp');
+    var DUR = [4200, 7200, 9500];
+    var CAP = [
+      ['Ancré dans le Lot', 'Au plus près des communes et des intercommunalités du département.'],
+      ['La rigueur du juriste', 'Formé au droit des collectivités : je sais ce qu’il faut vérifier, et pourquoi.'],
+      ['La bascule vers l’IA', 'L’IA repère plus vite les points sensibles. Le contrôle juridique reste humain.']
+    ];
+    var cur = -1, timer = null, lawTimers = [], visible = true, hovered = false, started = 0, remaining = 0;
+
+    function playLaw() {
+      lawTimers.forEach(clearTimeout); lawTimers = [];
+      lawMarks.forEach(function (m) { m.classList.remove('on'); }); lawRefs.forEach(function (r) { r.classList.remove('on'); }); stamp.classList.remove('on');
+      var on = function () { lawMarks.forEach(function (m) { m.classList.add('on'); }); lawRefs.forEach(function (r) { r.classList.add('on'); }); stamp.classList.add('on'); };
+      if (reduce) { on(); return; }
+      lawMarks.forEach(function (m, k) {
+        lawTimers.push(setTimeout(function () { m.classList.add('on'); lawRefs[k] && lawRefs[k].classList.add('on'); }, 700 + k * 1250));
+      });
+      lawTimers.push(setTimeout(function () { stamp.classList.add('on'); }, 700 + lawMarks.length * 1250 + 300));
+    }
+    function go(i, manual) {
+      if (i === cur) return;
+      clearTimeout(timer);
+      scenes.forEach(function (s, k) { s.classList.toggle('is-active', k === i); s.setAttribute('aria-hidden', k === i ? 'false' : 'true'); });
+      tabs.forEach(function (t, k) {
+        t.setAttribute('aria-selected', k === i ? 'true' : 'false');
+        t.classList.toggle('is-done', k < i);
+        var bar = t.querySelector('i'); bar.style.setProperty('--dur', DUR[k] + 'ms');
+        if (k === i) { bar.style.display = 'none'; void bar.offsetWidth; bar.style.display = ''; }
+      });
+      title.textContent = CAP[i][0]; text.textContent = CAP[i][1];
+      if (i === 1) playLaw();
+      if (i === 2) { ai.classList.remove('is-entering'); void ai.offsetWidth; ai.classList.add('is-entering'); ai._ai.play(); } else ai._ai.reset();
+      cur = i;
+      if (reduce) return;
+      if (manual) fig.classList.remove('is-paused');
+      schedule(DUR[i]);
+    }
+    function schedule(ms) { clearTimeout(timer); remaining = ms; started = Date.now(); if (visible && !hovered && !document.hidden) timer = setTimeout(function () { go((cur + 1) % 3); }, ms); }
+    function pause() { if (reduce || !timer) return; clearTimeout(timer); timer = null; remaining -= Date.now() - started; fig.classList.add('is-paused'); }
+    function resume() { if (reduce || timer || !visible || hovered || document.hidden) return; fig.classList.remove('is-paused'); schedule(Math.max(remaining, 600)); }
+    tabs.forEach(function (t) { t.addEventListener('click', function () { go(+t.dataset.go, true); }); });
+    tabs.forEach(function (t, k) {
+      t.addEventListener('keydown', function (e) {
+        var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!d) return;
+        var n = (k + d + 3) % 3; tabs[n].focus(); go(n, true);
+      });
+    });
+    var stage = fig.querySelectorAll('.hs-scene');
+    stage.forEach(function (s) { s.addEventListener('mouseenter', function () { hovered = true; pause(); }); s.addEventListener('mouseleave', function () { hovered = false; resume(); }); });
+    document.addEventListener('visibilitychange', function () { document.hidden ? pause() : resume(); });
+    if (reduce) fig.classList.add('is-static');
+    onVisible(fig, function (v) { visible = v; v ? resume() : pause(); }, 0.35);
+    go(0);
   }
 
   /* ---------- 2. Réseau animé (hero de la page IA) ---------- */
@@ -266,6 +337,7 @@
 
   function boot() {
     document.querySelectorAll('[data-ai-scan]').forEach(initAiScan);
+    document.querySelectorAll('[data-hero-story]').forEach(initHeroStory);
     document.querySelectorAll('canvas[data-network]').forEach(initNetwork);
     document.querySelectorAll('[data-prompt-lab]').forEach(initPromptLab);
     document.querySelectorAll('[data-diagnostic]').forEach(initDiagnostic);
